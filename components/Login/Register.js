@@ -1,11 +1,15 @@
-import { useState } from 'react'
-import styles from "../../styles/LoginStyles.module.css"
-import { useRouter } from 'next/router'
+import { useState } from "react";
+import styles from "../../styles/LoginStyles.module.css";
+import { useRouter } from "next/router";
 import axios from "axios";
-import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 import { initializeApp } from "firebase/app";
-//pull in the firebase config file with the assigned api keys for our app 
-const config = require('./config');
+//pull in the firebase config file with the assigned api keys for our app
+const config = require("./config");
 const firebaseConfig = {
   apiKey: config.REACT_APP_APIKEY,
   authDomain: config.REACT_APP_AUTHDOMAIN,
@@ -16,9 +20,8 @@ const firebaseConfig = {
   measurementId: config.REACT_APP_MEASUREMENTID,
 };
 
-
 const RegisterModal = ({ open, onClose }) => {
-  const router = useRouter()
+  const router = useRouter();
   const [regCode, setRegCode] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -35,33 +38,32 @@ const RegisterModal = ({ open, onClose }) => {
     event.preventDefault();
     fetch("/api/registration")
       .then((data) => {
-        return data.json()
+        return data.json();
       })
-      .then(
-        (data) => {
-            console.log("this is my data", data)
-          data.map((passcode) => {
-            // console.log(res)
-            let cohortCode = passcode.register_code
-            let cohort = passcode.cohort_name
-            let cohortID = passcode.cohort_id
-            if (regCode == cohortCode) {
-              console.log(cohort)
-              console.log(cohortID)
-              createUserWithEmailAndPassword(auth, email, Password)
+      .then((data) => {
+        console.log("this is my data", data);
+        data.map((passcode) => {
+          // console.log(res)
+          let cohortCode = passcode.register_code;
+          let cohort = passcode.cohort_name;
+          let cohortID = passcode.cohort_id;
+          if (regCode == cohortCode) {
+            console.log(cohort);
+            console.log(cohortID);
+            createUserWithEmailAndPassword(auth, email, Password)
               .catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
-                if (errorCode == 'auth/email-already-in-use') {
-                  alert('This user for this email already exists');
+                if (errorCode == "auth/email-already-in-use") {
+                  alert("This user for this email already exists");
                 } else {
                   alert(errorMessage);
                 }
                 // console.log(errorCode)
               })
-              .then((userCredential)=>{
-                console.log(userCredential)
-                if(userCredential){
+              .then((userCredential) => {
+                console.log(userCredential);
+                if (userCredential) {
                   axios.post("/api/admin", {
                     admin: false,
                     first: firstName,
@@ -70,27 +72,24 @@ const RegisterModal = ({ open, onClose }) => {
                     //password: Password,
                     email: email,
                     cohort_name: cohort,
-                    cohort_id: cohortID
+                    cohort_id: cohortID,
                   });
                   signOut(auth).then(() => {
                     // Sign-out successful.
                     //alert('New Admin account created for email ', newEmail);
-                    window.alert("User Created")
+                    window.alert("User Created");
                     //window.location.reload();
                     router.push("/admin/edit");
-                  })
+                  });
                 }
-              })
-              //window.location.reload();
-            }
-            else {
-              router.push('/registrationerror')
-            }
-
-          })
-        }
-      )
-  }
+              });
+            //window.location.reload();
+          } else {
+            router.push("/registrationerror");
+          }
+        });
+      });
+  };
 
   return (
     <>
@@ -99,7 +98,6 @@ const RegisterModal = ({ open, onClose }) => {
         <div className={styles.registerModalCreateParent}>
           <div className={styles.registerModalCreateHeader}>
             <h1 className={styles.modalHeader}>Sign Up</h1>
-
           </div>
           <div className={styles.registerModalCreateForm}>
             <form>
@@ -108,7 +106,7 @@ const RegisterModal = ({ open, onClose }) => {
                   className={styles.registerModalCreateFormInput}
                   id="reg code"
                   type="text"
-                  placeholder='Registration Code'
+                  placeholder="Registration Code"
                   onChange={(event) => setRegCode(event.target.value)}
                   value={regCode}
                   required
@@ -175,18 +173,22 @@ const RegisterModal = ({ open, onClose }) => {
                   className={styles.registerModalCreateFormSubmitBtn}
                   type="submit"
                   onClick={(event) => register(event)}
-
                 >
                   Submit
                 </button>
-                <button onClick={onClose} className={styles.registerModalCloseBtn}>Cancel</button>
+                <button
+                  onClick={onClose}
+                  className={styles.registerModalCloseBtn}
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default RegisterModal
+export default RegisterModal;
